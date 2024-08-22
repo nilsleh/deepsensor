@@ -758,7 +758,7 @@ class DeepSensorModel(ProbabilisticModel):
 
 
          
-        def get_patch_overlap(overlap_norm, data_processor, X_t_ds, x1_ascend, x2_ascend) -> int:
+        def get_patch_overlap(overlap_norm, data_processor, X_t_ds, x1_ascend=True, x2_ascend=True) -> int:
             """
             Calculate overlap between adjacent patches in pixels. 
             
@@ -773,10 +773,10 @@ class DeepSensorModel(ProbabilisticModel):
             X_t_ds (:class:`xarray.Dataset` | :class:`xarray.DataArray` | :class:`pandas.DataFrame` | :class:`pandas.Series` | :class:`pandas.Index` | :class:`numpy:numpy.ndarray`):
                 Data array containing target locations to predict at. 
             
-            x1_ascend : str:
+            x1_ascend : bool:
                 Boolean defining whether the x1 coords ascend (increase) from top to bottom, default = True. 
             
-            x2_ascend : str:
+            x2_ascend : bool:
                 Boolean defining whether the x2 coords ascend (increase) from left to right, default = True. 
             
             Returns
@@ -863,10 +863,10 @@ class DeepSensorModel(ProbabilisticModel):
             patches_per_row: int
                 Number of patchwise predictions in each row.
             
-            x1_ascend : str
+            x1_ascend : bool
                 Boolean defining whether the x1 coords ascend (increase) from top to bottom, default = True. 
             
-            x2_ascend : str
+            x2_ascend : bool
                 Boolean defining whether the x2 coords ascend (increase) from left to right, default = True. 
            
             Returns
@@ -998,7 +998,7 @@ class DeepSensorModel(ProbabilisticModel):
             preds.append(pred)
 
         overlap_norm = tuple(patch - stride for patch, stride in zip(task["patch_size"], task["stride"]))
-        patch_overlap_unnorm = get_patch_overlap(overlap_norm, data_processor, X_t)
+        patch_overlap_unnorm = get_patch_overlap(overlap_norm, data_processor, X_t, x1_ascending, x2_ascending)
 
         patches_per_row = get_patches_per_row(preds)
         stitched_prediction = stitch_clipped_predictions(preds, patch_overlap_unnorm, patches_per_row, x1_ascending, x2_ascending)
