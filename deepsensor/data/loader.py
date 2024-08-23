@@ -834,7 +834,7 @@ class TaskLoader:
                 x2_max = var_x2_max
 
         return [x1_min, x1_max, x2_min, x2_max]
-    
+
     def _compute_x1x2_direction(self) -> str:
         """
         Compute whether the x1 and x2 coords are ascending or descending.
@@ -842,18 +842,18 @@ class TaskLoader:
         Returns
         -------
         coord_directions: dict(str)
-            String containing two booleans: x1_ascend and x2_ascend, 
-            defining if these coordings increase or decrease from top left corner. 
- 
-        """      
+            String containing two booleans: x1_ascend and x2_ascend,
+            defining if these coordings increase or decrease from top left corner.
+
+        """
 
         for var in itertools.chain(self.context, self.target):
             if isinstance(var, (xr.Dataset, xr.DataArray)):
-                coord_x1_left= var.x1[0]
-                coord_x1_right= var.x1[-1]
-                coord_x2_top= var.x2[0]
-                coord_x2_bottom= var.x2[-1]
-            #Todo- what to input for pd.dataframe
+                coord_x1_left = var.x1[0]
+                coord_x1_right = var.x1[-1]
+                coord_x2_top = var.x2[0]
+                coord_x2_bottom = var.x2[-1]
+            # Todo- what to input for pd.dataframe
             elif isinstance(var, (pd.DataFrame, pd.Series)):
                 var_x1_min = var.index.get_level_values("x1").min()
                 var_x1_max = var.index.get_level_values("x1").max()
@@ -872,14 +872,12 @@ class TaskLoader:
             if coord_x2_top > coord_x2_bottom:
                 x2_ascend = False
 
-
-
         coord_directions = {
-                "x1": x1_ascend,
-                "x2": x2_ascend,
-            }
+            "x1": x1_ascend,
+            "x2": x2_ascend,
+        }
 
-        return coord_directions 
+        return coord_directions
 
     def sample_random_window(self, patch_size: Tuple[float]) -> Sequence[float]:
         """
@@ -959,7 +957,7 @@ class TaskLoader:
         Returns:
             var (...)
                 Sliced variable.
-        
+
         Raises:
             ValueError
                 If the variable is of an unknown type.
@@ -1243,7 +1241,9 @@ class TaskLoader:
         task["time"] = date
         task["ops"] = []
         task["bbox"] = bbox
-        task["patch_size"] = patch_size # store patch_size and stride in task for use in stitching in prediction
+        task["patch_size"] = (
+            patch_size  # store patch_size and stride in task for use in stitching in prediction
+        )
         task["stride"] = stride
         task["X_c"] = []
         task["Y_c"] = []
@@ -1470,7 +1470,7 @@ class TaskLoader:
         # define stride length in x1/x2 or set to patch_size if undefined
         if stride is None:
             stride = patch_size
-        
+
         dy, dx = stride
         # Calculate the global bounds of context and target set.
         x1_min, x1_max, x2_min, x2_max = self.coord_bounds
@@ -1478,7 +1478,7 @@ class TaskLoader:
         patch_list = []
 
         # Todo: simplify these elif statements
-        if self.coord_directions['x1'] == False and self.coord_directions['x2'] == True:
+        if self.coord_directions["x1"] == False and self.coord_directions["x2"] == True:
             for y in np.arange(x1_max, x1_min, -dy):
                 for x in np.arange(x2_min, x2_max, dx):
                     if y - x1_extend < x1_min:
@@ -1494,7 +1494,10 @@ class TaskLoader:
                     bbox = [y0 - x1_extend, y0, x0, x0 + x2_extend]
                     patch_list.append(bbox)
 
-        elif self.coord_directions['x1'] == False and self.coord_directions['x2'] == False:
+        elif (
+            self.coord_directions["x1"] == False
+            and self.coord_directions["x2"] == False
+        ):
             for y in np.arange(x1_max, x1_min, -dy):
                 for x in np.arange(x2_max, x2_min, -dx):
                     if y - x1_extend < x1_min:
@@ -1510,7 +1513,9 @@ class TaskLoader:
                     bbox = [y0 - x1_extend, y0, x0 - x2_extend, x0]
                     patch_list.append(bbox)
 
-        elif self.coord_directions['x1'] == True and self.coord_directions['x2'] == False:
+        elif (
+            self.coord_directions["x1"] == True and self.coord_directions["x2"] == False
+        ):
             for y in np.arange(x1_min, x1_max, dy):
                 for x in np.arange(x2_max, x2_min, -dx):
                     if y + x1_extend > x1_max:
@@ -1674,7 +1679,7 @@ class TaskLoader:
                 )
 
         elif patch_strategy == "random":
-            
+
             assert (
                 patch_size is not None
             ), "Patch size must be specified for random patch sampling"
@@ -1700,21 +1705,21 @@ class TaskLoader:
 
             else:
                 bboxes = [
-                        self.sample_random_window(patch_size)
-                        for _ in range(num_samples_per_date)
-                    ]
+                    self.sample_random_window(patch_size)
+                    for _ in range(num_samples_per_date)
+                ]
                 tasks = [
-                        self.task_generation(
-                            date,
-                            bbox=bbox,
-                            context_sampling=context_sampling,
-                            target_sampling=target_sampling,
-                            split_frac=split_frac,
-                            datewise_deterministic=datewise_deterministic,
-                            seed_override=seed_override,
-                        )
-                        for bbox in bboxes
-                    ]
+                    self.task_generation(
+                        date,
+                        bbox=bbox,
+                        context_sampling=context_sampling,
+                        target_sampling=target_sampling,
+                        split_frac=split_frac,
+                        datewise_deterministic=datewise_deterministic,
+                        seed_override=seed_override,
+                    )
+                    for bbox in bboxes
+                ]
 
         elif patch_strategy == "sliding":
             # sliding window sampling of patch
@@ -1737,7 +1742,7 @@ class TaskLoader:
                                 datewise_deterministic=datewise_deterministic,
                                 seed_override=seed_override,
                                 patch_size=patch_size,
-                                stride=stride
+                                stride=stride,
                             )
                             for bbox in bboxes
                         ]
@@ -1754,7 +1759,7 @@ class TaskLoader:
                         datewise_deterministic=datewise_deterministic,
                         seed_override=seed_override,
                         patch_size=patch_size,
-                        stride=stride
+                        stride=stride,
                     )
                     for bbox in bboxes
                 ]

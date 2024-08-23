@@ -592,7 +592,6 @@ class TestModel(unittest.TestCase):
             assert self.da.x1.size == pred[var_ID].x1.size
             assert self.da.x2.size == pred[var_ID].x2.size
 
-
     def test_saving_and_loading(self):
         """Test saving and loading of model"""
         with tempfile.TemporaryDirectory() as folder:
